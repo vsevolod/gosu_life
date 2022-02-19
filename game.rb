@@ -16,9 +16,13 @@ class Life < Gosu::Window
 
     @background = Background.new(self)
     @map = Map.new(X_AMOUNT, Y_AMOUNT)
+    @tick = 0
   end
 
   def update
+    every_tick do
+      next_step
+    end
   end
 
   def draw
@@ -28,10 +32,34 @@ class Life < Gosu::Window
 
   private
 
+  def sym(x)
+    x.alive? ? 'X' : ' '
+  end
+
+  def next_step
+    @map.each do |x:, y:, cell:, neighbours:|
+      alive_neighbours_count = neighbours.count(&:alive?)
+
+      if cell.alive?
+        cell.death! unless [2, 3].include?(alive_neighbours_count)
+      else
+        cell.birth! if alive_neighbours_count == 3
+      end
+    end
+
+    @map.commit!
+  end
+
   def draw_map
     @map.each do |x:, y:, cell:, neighbours:|
       cell.draw(x: x, y: y, size: CELL_SIZE, window: self)
     end
+  end
+
+  def every_tick
+    @tick += 1
+    yield if @tick % 20 == 0
+    @tick = 0 if @tick == 10_000_000
   end
 end
 

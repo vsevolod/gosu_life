@@ -5,9 +5,9 @@ class Map
     @x_amount = x_amount
     @y_amount = y_amount
 
-    @area = Array.new(x_amount) do |y|
-      Array.new(y_amount) do |x|
-        Cell.new(filled: filled_pattern(x, y))
+    @area = Array.new(y_amount) do |y|
+      Array.new(x_amount) do |x|
+        Cell.new(alive: filled_pattern(x, y))
       end
     end
   end
@@ -25,6 +25,12 @@ class Map
     end
   end
 
+  def commit!
+    each do |x:, y:, cell:, neighbours:|
+      cell.commit!
+    end
+  end
+
   private
 
   def filled_pattern(_x, _y)
@@ -32,14 +38,20 @@ class Map
   end
 
   def neighbours(y_index, x_index)
+    x_prev = x_index - 1
+    y_prev = y_index - 1
     x_next = x_index + 1 < x_amount ? x_index + 1 : 0
     y_next = y_index + 1 < y_amount ? y_index + 1 : 0
 
-    {
-      left:  area[y_index][x_index - 1],
-      top:   area[y_index - 1][x_index],
-      right: area[y_index][x_next],
-      down:  area[y_next][x_index],
-    }
+    [
+      area[y_prev][x_prev],  # Top left
+      area[y_prev][x_index], # Top
+      area[y_prev][x_next],  # Top right
+      area[y_index][x_prev], # Left
+      area[y_index][x_next], # Right
+      area[y_next][x_prev],  # Bottom left
+      area[y_next][x_index], # Bottom
+      area[y_next][x_next],  # Bottom right
+    ]
   end
 end
