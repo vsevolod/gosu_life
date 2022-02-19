@@ -9,6 +9,8 @@ class Life < Gosu::Window
   X_AMOUNT = 100
   Y_AMOUNT = 70
   CELL_SIZE = 10
+  TICK_FREQUENCY = 60
+  FADE_FREQUENCY = TICK_FREQUENCY / 4
 
   def initialize
     super(X_AMOUNT * CELL_SIZE, Y_AMOUNT * CELL_SIZE)
@@ -51,15 +53,34 @@ class Life < Gosu::Window
   end
 
   def draw_map
+    alpha = count_alpha
+
     @map.each do |x:, y:, cell:, neighbours:|
-      cell.draw(x: x, y: y, size: CELL_SIZE, window: self)
+      cell.draw(
+        x: x,
+        y: y,
+        size: CELL_SIZE,
+        window: self,
+        alpha: alpha
+      )
     end
   end
 
+  private
+
   def every_tick
     @tick += 1
-    yield if @tick % 20 == 0
+    yield if @tick % TICK_FREQUENCY == 0
     @tick = 0 if @tick == 10_000_000
+  end
+
+  def count_alpha
+    tick_freq = @tick % TICK_FREQUENCY
+    if tick_freq > FADE_FREQUENCY
+      0xff
+    else
+      (0xff * (tick_freq * 1.0 / FADE_FREQUENCY)).to_i
+    end
   end
 end
 

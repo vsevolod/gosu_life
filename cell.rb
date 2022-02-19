@@ -2,27 +2,32 @@ class Cell
   CELL_Z_POSITION = 1
   GREEN_COLOR = 0xff_00ff00
   WHITE_COLOR = 0xff_ffffff
+  MAX_AGE = 10
 
-  attr_reader :alive
-  attr_reader :next_value
+  attr_reader :current_value, :prev_value, :next_value
+  attr_reader :age
 
   def initialize(alive: true)
-    @alive = alive
+    @current_value = alive
+    @prev_value = alive
+
+    @age = alive? ? 1 : 0
   end
 
-  alias alive? alive
+  alias alive? current_value
 
-  def draw(x:, y:, size:, window:)
+  def draw(x:, y:, size:, window:, alpha: 0xff)
     window.draw_rect(
       x*size, y*size,
       size - 1, size - 1,
-      color,
+      Gosu::Color.argb(color(alpha)),
       CELL_Z_POSITION
     )
   end
 
   def birth!
     @next_value = true
+    @age = 0
   end
 
   def death!
@@ -30,16 +35,31 @@ class Cell
   end
 
   def commit!
-    @alive = @next_value
+    return if next_value.nil?
+
+    if next_value == current_value && alive?
+      @age += 1 if @age < MAX_AGE
+    end
+
+    @prev_value = current_value
+    @current_value = next_value
   end
 
   private
 
-  def color
-    if alive?
-      Gosu::Color.argb(GREEN_COLOR)
+  def color(alpha)
+    if prev_value == current_value
+      if alive?
+        GREEN_COLOR - age * 10 * 0x100
+      else
+        WHITE_COLOR
+      end
     else
-      Gosu::Color.argb(WHITE_COLOR)
+      if alive? # Born
+        WHITE_COLOR - alpha - alpha * 0x10000
+      else # Death
+        GREEN_COLOR + alpha + alpha * 0x10000
+      end
     end
   end
 end
