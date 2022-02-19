@@ -4,12 +4,14 @@ class Cell
   WHITE_COLOR = 0xff_ffffff
   MAX_AGE = 10
 
-  attr_reader :current_value, :prev_value, :next_value
+  attr_reader :current_value, :prev_value, :next_value, :toggled
   attr_reader :age
 
   def initialize(alive: true)
     @current_value = alive
     @prev_value = alive
+    @drawed = false
+    @toggled = false
 
     @age = alive? ? 1 : 0
   end
@@ -34,7 +36,20 @@ class Cell
     @next_value = false
   end
 
+  def toggle!
+    return if toggled
+
+    value = !alive?
+
+    @prev_value = value
+    @current_value = value
+    @prev_value = value
+    @age = 0
+    @toggled = true
+  end
+
   def commit!
+    @toggled = false
     return if next_value.nil?
 
     if next_value == current_value && alive?

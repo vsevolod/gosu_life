@@ -4,12 +4,13 @@ require 'pry'
 require_relative './background'
 require_relative './cell'
 require_relative './map'
+require_relative './events/mouse_click'
 
 class Life < Gosu::Window
   X_AMOUNT = 100
   Y_AMOUNT = 70
   CELL_SIZE = 10
-  TICK_FREQUENCY = 60
+  TICK_FREQUENCY = 50
   FADE_FREQUENCY = TICK_FREQUENCY / 4
 
   def initialize
@@ -19,9 +20,12 @@ class Life < Gosu::Window
     @background = Background.new(self)
     @map = Map.new(X_AMOUNT, Y_AMOUNT)
     @tick = 0
+    @draw_mode = false
   end
 
   def update
+    draw_cell if @draw_mode
+
     every_tick do
       next_step
     end
@@ -66,7 +70,28 @@ class Life < Gosu::Window
     end
   end
 
+  def button_down(id)
+    case id
+    when Gosu::MsLeft
+      @draw_mode = true
+    end
+  end
+
+  def button_up(id)
+    case id
+    when Gosu::MsLeft
+      @draw_mode = false
+    end
+  end
+
   private
+
+  def draw_cell
+    Events::MouseClick.new(map: @map).call(
+      (mouse_x / CELL_SIZE).floor,
+      (mouse_y / CELL_SIZE).floor
+    )
+  end
 
   def every_tick
     @tick += 1

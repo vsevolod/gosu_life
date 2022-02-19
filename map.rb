@@ -31,10 +31,15 @@ class Map
     end
   end
 
+  def cell(x, y)
+    area[y][x]
+  end
+
   private
 
   def filled_pattern(_x, _y)
-    rand(2) == 0
+    false
+    #rand(2) == 0
   end
 
   def neighbours(y_index, x_index)
