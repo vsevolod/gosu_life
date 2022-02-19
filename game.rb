@@ -2,6 +2,7 @@ require 'gosu'
 
 require 'pry'
 require_relative './background'
+require_relative './info'
 require_relative './cell'
 require_relative './map'
 require_relative './events/mouse_click'
@@ -21,6 +22,7 @@ class Life < Gosu::Window
     self.caption = 'The game of life'
 
     @background = Background.new(self)
+    @info = Info.new
     @map = Map.new(X_AMOUNT, Y_AMOUNT)
     @tick = 0
     @draw_mode = false
@@ -45,6 +47,12 @@ class Life < Gosu::Window
   def draw
     @background.draw
     draw_map
+    @info.draw(self)
+  end
+
+  # Instead of redefint tick method
+  def get_tick
+    @tick
   end
 
   private
